@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gestión de Inventarios</title>
+
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web:300">
+
+</head>
+
+<body>
+
+    <!-- Barra lateral -->
+    <nav class="main-menu">
+
+        <ul>
+
+            <li>
+
+                <a href="#" data-modulo="empleados">
+
+                    <i class="fa fa-users nav-icon"></i>
+                    <span class="nav-text">Empleados</span>
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a href="#" data-modulo="productos">
+
+                    <i class="fa fa-cube nav-icon"></i>
+                    <span class="nav-text">Productos</span>
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a href="#" data-modulo="proveedores">
+
+                    <i class="fa fa-truck nav-icon"></i>
+                    <span class="nav-text">Proveedores</span>
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a href="#" data-modulo="movimientos">
+
+                    <i class="fa fa-exchange-alt nav-icon"></i>
+                    <span class="nav-text">Movimientos</span>
+
+                </a>
+
+            </li>
+
+        </ul>
+
+        <ul class="logout">
+
+            <li>
+
+                <a href="#" class="logout">
+
+                    <i class="fa fa-power-off nav-icon"></i>
+                    <span class="nav-text">Cerrar sesión</span>
+
+                </a>
+
+            </li>
+
+        </ul>
+
+    </nav>
+
+
+    <!-- Contenido principal -->
+    <div class="main-content">
+
+        <header class="module-title">
+
+            <h1 id="modulo-titulo">Nombre del módulo</h1>
+
+        </header>
+
+        <section class="table-section">
+               
+            <section id="tabla-contenedor">
+
+                <section id="boton-registrar" style="text-align: center; padding-bottom: 10px;">
+
+                    <button id="btn-registrar">Registrar nuevo</button>
+
+                </section>
+
+                <table id="tabla-datos">
+
+                    <thead>
+
+                        <tr>
+
+                            <!-- Cabecera dinámica según el módulo -->
+                            
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <!-- Datos dinámicos cargados desde el backend -->
+
+                    </tbody>
+
+                </table>
+
+            </section>
+
+        </section>
+
+    </div>
+    
+
+    <!-- Modal para registro/edición -->
+    <div id="modal-formulario" class="modal oculto">
+
+        <div class="modal-contenido">
+
+            <h2 id="modal-titulo">Registrar nuevo</h2>
+
+            <form id="formulario-dinamico">
+
+                <!-- Campos dinámicos según el módulo -->
+
+                <div id="campos-formulario">
+
+                    <!-- Ejemplo de campo genérico -->
+
+                </div>
+
+                <button type="submit" id="btn-enviar">Guardar</button>
+                <button type="button" id="btn-cerrar-modal">Cerrar</button>
+
+            </form>
+
+        </div>
+
+    </div>
+    
+
+    <div id="modal-detalles" class="modal oculto">
+
+        <div class="modal-contenido">
+
+            <span id="btn-cerrar-detalles" class="cerrar-modal">&times;</span>
+
+            <h2>Detalles del Registro</h2>
+
+            <div class="detalles-contenido">
+
+                <!-- Los detalles del registro se cargarán aquí -->
+
+            </div>
+
+        </div>
+
+    </div>
+    
+
+    <!-- Scripts -->
+    <script src="main.js"></script>
+    
+</body>
+</html>
