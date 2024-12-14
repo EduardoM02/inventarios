@@ -47,15 +47,15 @@ router.post('/', async (req, res) => {
     // Encriptar la contraseña
     try {
 
-        const salt = await bcrypt.genSalt(10); // Generar un "salt" para la encriptación
-        const hashedPassword = await bcrypt.hash(password, salt); // Encriptar la contraseña
+        const salt = await bcrypt.genSalt(10); 
+        const hashedPassword = await bcrypt.hash(password, salt); 
 
         db.query('INSERT INTO empleados (nombre, email, password, rol) VALUES (?, ?, ?, ?)', 
             [nombre, email, hashedPassword, rol], 
             (err, results) => {
 
                 if (err) return res.status(500).json({ error: err.message });
-                res.json({ id: results.insertId, mensaje: 'Empleado agregado correctamente' });
+                res.json({ mensaje: 'Empleado agregado correctamente' });
 
             }
 

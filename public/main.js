@@ -7,6 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const camposFormulario = document.getElementById('campos-formulario');
     const modalFormulario = document.getElementById('modal-formulario');
     const btnRegistrar = document.getElementById('btn-registrar');
+    const btnEnviar = document.getElementById('btn-enviar');
+    const modalExito = document.getElementById('modal-exito');
+    const modalError = document.getElementById('modal-error');
+    const modalConfirmacion = document.getElementById('modal-confirmacion');
+    const btnCerrarExito = document.getElementById('btn-cerrar-exito');
+    const btnCerrarError = document.getElementById('btn-cerrar-error');
+    const btnConfirmar = document.getElementById('btn-confirmar');
+    const btnCancelar = document.getElementById('btn-cancelar');
     
 
 
@@ -24,24 +32,169 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // Cargar campos dinámicos en el formulario
-    const cargarCamposFormulario = (modulo) => {
+    // Evento para abrir el modal de registro
+    btnRegistrar.addEventListener('click', () => {
 
-        camposFormulario.innerHTML = ''; // Limpiar campos
+        modalFormulario.classList.remove('oculto');
+        cargarCamposFormularioRegistro(moduloActivo);
+
+    });
+
+
+    // Cerrar el modal
+    document.getElementById('btn-cerrar-modal').addEventListener('click', () => {
+
+        modalFormulario.classList.add('oculto'); // Ocultar el modal
+
+    });
+
+    // Evento para enviar el formulario
+    btnEnviar.addEventListener('click', (e) => {
+
+        e.preventDefault();
+        const formData = new FormData(document.getElementById('formulario-dinamico'));
+        const jsonData = {};
+
+        formData.forEach((value, key) => {
+
+            jsonData[key] = value;
+
+        });
+
+        const id = jsonData.id_empleado || jsonData.id_producto;
+        const url = `/api/${moduloActivo}`;
+        const method = id ? 'PUT' : 'POST';
+        const endpoint = id ? `${url}/${id}` : url;
+
+        fetch(endpoint, {
+
+            method: method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(jsonData)
+
+        })
+        .then(response => response.json())
+        .then(data => {
+
+            if (data.error) {
+
+                mostrarModalError(data.error);
+
+            } else {
+
+                mostrarModalExito(data.mensaje || 'Operación realizada con éxito.');
+                modalFormulario.classList.add('oculto');
+                cargarModulo(moduloActivo); 
+
+            }
+
+        })
+        .catch((error) => {
+
+            console.error('Error:', error);
+            mostrarModalError('Ha ocurrido un error. Por favor, inténtelo de nuevo.');
+
+        });
+
+    });
+
+    // Función para mostrar el modal de éxito
+    const mostrarModalExito = (mensaje) => {
+        
+        document.getElementById('mensaje-exito').textContent = mensaje;
+        modalExito.classList.remove('oculto');
+
+    };
+
+    // Función para mostrar el modal de error
+    const mostrarModalError = (mensaje) => {
+
+        document.getElementById('mensaje-error').textContent = mensaje;
+        modalError.classList.remove('oculto');
+
+    };
+
+    // Función para mostrar el modal de confirmación
+    const mostrarModalConfirmacion = (id) => {
+
+        modalConfirmacion.classList.remove('oculto');
+
+        btnConfirmar.onclick = () => {
+
+            eliminarRegistro(id);
+            modalConfirmacion.classList.add('oculto');
+
+        };
+
+    };
+
+    // Evento para cerrar los modales de éxito y error
+    btnCerrarExito.addEventListener('click', () => {
+
+        modalExito.classList.add('oculto');
+
+    });
+
+    btnCerrarError.addEventListener('click', () => {
+
+        modalError.classList.add('oculto');
+
+    });
+
+    btnCancelar.addEventListener('click', () => {
+
+        modalConfirmacion.classList.add('oculto');
+
+    });
+
+
+    // Función para eliminar un registro
+    const eliminarRegistro = (id) => {
+
+        fetch(`/api/${moduloActivo}/${id}`, {
+
+            method: 'DELETE'
+
+        })
+
+        .then(response => response.json())
+        .then(data => {
+
+            console.log('Registro eliminado:', data);
+            cargarModulo(moduloActivo);
+
+        })
+
+        .catch((error) => {
+
+            console.error('Error al eliminar el registro:', error);
+            mostrarModalError('Ha ocurrido un error al eliminar el registro. Por favor, inténtelo de nuevo.');
+
+        });
+
+    };
+
+
+    // Función para cargar campos del formulario de registro
+    const cargarCamposFormularioRegistro = (modulo) => {
+
+        camposFormulario.innerHTML = ''; 
 
         if (modulo === 'empleados') {
 
             camposFormulario.innerHTML = `
-                <label for="nombre">Nombre:</label>
-                <input type="text" id="nombre" name="nombre" required>
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-                <label for="password">Contraseña:</label>
-                <input type="password" id="password" name="password" required>
-                <label for="rol">Rol:</label>
-                <select id="rol" name="rol">
-                    <option value="admin">Admin</option>
+                <label for="nombre" class="form-label">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" class="form-control" required>
+                <label for="email" class="form-label">Email:</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+                <label for="password" class="form-label">Contraseña:</label>
+                <input type="password" id="password" name="password" class="form-control" required>
+                <label for="rol" class="form-label">Rol:</label>
+                <select id="rol" name="rol" class="form-select" required>
                     <option value="usuario">Usuario</option>
+                    <option value="admin">Admin</option>
                 </select>
             `;
 
@@ -58,26 +211,93 @@ document.addEventListener('DOMContentLoaded', () => {
 
         }
 
-        // Agrega más casos para otros módulos
+        // Agregar más módulos según sea necesario
+
+    };
+
+    // Función para cargar campos del formulario de edición
+    const cargarCamposFormularioEdicion = (modulo, data) => {
+
+        camposFormulario.innerHTML = '';
+
+        if (modulo === 'empleados') {
+
+            Object.keys(data).forEach((key) => {
+
+                if (key === 'id') {
+
+                    camposFormulario.innerHTML += `
+                        <label for="${key}" class="form-label">${key.charAt(0).toUpperCase() + key.slice(1)}:</label>
+                        <input type="text" id="${key}" name="${key}" value="${data[key]}" class="form-control" readonly>
+                    `;
+
+                } else if (key === 'rol') {
+
+                    camposFormulario.innerHTML += `
+                        <label for="${key}" class="form-label">${key.charAt(0).toUpperCase() + key.slice(1)}:</label>
+                        <select id="${key}" name="${key}" class="form-select" required>
+                            <option value="usuario" ${data[key] === 'usuario' ? 'selected' : ''}>Usuario</option>
+                            <option value="admin" ${data[key] === 'admin' ? 'selected' : ''}>Admin</option>
+                        </select>
+                    `;
+
+                } else if (key !== 'updated_at' && key !== 'created_at' && key !== 'password') {
+
+                    camposFormulario.innerHTML += `
+                        <label for="${key}" class="form-label">${key.charAt(0).toUpperCase() + key.slice(1)}:</label>
+                        <input type="text" id="${key}" name="${key}" value="${data[key]}" class="form-control" required>
+                    `;
+
+                }
+
+            });
+
+            // Agregar campo de contraseña con placeholder
+            camposFormulario.innerHTML += `
+                <label for="password" class="form-label">Contraseña:</label>
+                <input type="password" id="password" name="password" placeholder="Escribir nueva contraseña" class="form-control">
+            `;
+
+        } else if (modulo === 'productos') {
+
+            camposFormulario.innerHTML = `
+                <label for="nombre">Nombre del producto:</label>
+                <input type="text" id="nombre" name="nombre" value="${data.nombre}" required>
+                <label for="cantidad">Cantidad:</label>
+                <input type="number" id="cantidad" name="cantidad" value="${data.cantidad}" required>
+                <label for="precio_unitario">Precio Unitario:</label>
+                <input type="number" step="0.01" id="precio_unitario" name="precio_unitario" value="${data.precio_unitario}" required>
+            `;
+
+        }
+
+        // Agregar más módulos según sea necesario
 
     };
 
 
-    // Abrir el modal para registrar/editar
-    btnRegistrar.addEventListener('click', () => {
+    // Función para abrir el modal de edición
+    const abrirModalEdicion = (id) => {
 
-        cargarCamposFormulario(moduloActivo);
-        modalFormulario.classList.remove('oculto'); // Mostrar el modal
+        fetch(`/api/${moduloActivo}/${id}`)
+            .then(response => response.json())
+            .then(data => {
 
-    });
+                cargarCamposFormularioEdicion(moduloActivo, data);
+                modalFormulario.classList.remove('oculto');
 
+            })
+            .catch(error => {
 
-    // Cerrar el modal
-    document.getElementById('btn-cerrar-modal').addEventListener('click', () => {
+                console.error('Error al cargar los datos del registro:', error);
+                mostrarModalError('Ha ocurrido un error al cargar los datos del registro. Por favor, inténtelo de nuevo.');
 
-        modalFormulario.classList.add('oculto'); // Ocultar el modal
+            });
 
-    });
+    };
+
+    window.abrirModalEdicion = abrirModalEdicion;
+    window.mostrarModalConfirmacion = mostrarModalConfirmacion;
 
 });
 
@@ -113,8 +333,8 @@ const cargarModulo = (modulo) => {
 // Campos a mostrar por módulo
 const camposAMostrar = {
 
-    empleados: ['id_empleado', 'nombre', 'email', 'rol'], // Campos a mostrar para empleados
-    productos: ['id_producto', 'nombre', 'cantidad'], // Campos a mostrar para productos
+    empleados: ['id_empleado', 'nombre', 'email', 'rol'], 
+    productos: ['id_producto', 'nombre', 'cantidad'],
     
 
 };
@@ -126,7 +346,7 @@ const actualizarTabla = (data, modulo) => {
     const thead = document.querySelector('#tabla-datos thead');
     const tbody = document.querySelector('#tabla-datos tbody');
 
-    // Limpiar contenido existente
+    
     thead.innerHTML = '';
     tbody.innerHTML = '';
 
@@ -158,9 +378,15 @@ const actualizarTabla = (data, modulo) => {
             <tr>
                 ${row}
                 <td>
-                    <button onclick="verDetalles(${idValor})">Detalles</button>
-                    <button onclick="abrirModalEdicion(${idValor})">Editar</button>
-                    <button onclick="eliminarRegistro(${idValor}, '${modulo}')">Eliminar</button>
+                    <button class="btn-primary" onclick="verDetalles(${idValor})">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                    <button class="btn-warning" onclick="abrirModalEdicion(${idValor})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-danger" onclick="mostrarModalConfirmacion(${idValor})">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
                 </td>
             </tr>
         `;   
@@ -211,80 +437,11 @@ const verDetalles = (id) => {
 };
 
 
-const abrirModalEdicion = (id) => {
-    fetch(`/api/${moduloActivo}/${id}`)
-        .then((response) => response.json())
-        .then((data) => {
-            const modalFormulario = document.getElementById('modal-formulario');
-            const camposFormulario = document.getElementById('campos-formulario');
-            const modalTitulo = document.getElementById('modal-titulo');
-            const btnEnviar = document.getElementById('btn-enviar');
-
-            // Cambia el título del modal
-            modalTitulo.textContent = 'Editar Registro';
-
-            // Limpia los campos del formulario
-            camposFormulario.innerHTML = '';
-
-            // Llena el formulario con los datos del registro
-            Object.keys(data).forEach((key) => {
-                if (key === 'id') {
-                    camposFormulario.innerHTML += `
-                        <label for="${key}">${key.charAt(0).toUpperCase() + key.slice(1)}:</label>
-                        <input type="text" id="${key}" name="${key}" value="${data[key]}" readonly>
-                    `;
-                } else if (key !== 'updated_at' && key !== 'created_at' && key !== 'password') {
-                    camposFormulario.innerHTML += `
-                        <label for="${key}">${key.charAt(0).toUpperCase() + key.slice(1)}:</label>
-                        <input type="text" id="${key}" name="${key}" value="${data[key]}" required>
-                    `;
-                }
-            });
-
-            // Agregar campo de contraseña con placeholder
-            camposFormulario.innerHTML += `
-                <label for="password">Contraseña:</label>
-                <input type="password" id="password" name="password" placeholder="Escribir nueva contraseña">
-            `;
-
-            // Cambia el evento del botón de enviar para actualizar el registro
-            btnEnviar.onclick = (event) => {
-                event.preventDefault();
-                const formData = new FormData(document.getElementById('formulario-dinamico'));
-                const jsonData = {};
-                formData.forEach((value, key) => {
-                    jsonData[key] = value;
-                });
-
-                fetch(`/api/${moduloActivo}/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(jsonData)
-                })
-                .then((response) => response.json())
-                .then((data) => {
-                    console.log('Registro actualizado:', data);
-                    modalFormulario.classList.add('oculto');
-                    // Actualiza la tabla de datos o realiza cualquier otra acción necesaria
-                })
-                .catch((error) => {
-                    console.error('Error al actualizar el registro:', error);
-                });
-            };
-
-            // Muestra el modal
-            modalFormulario.classList.remove('oculto');
-        })
-        .catch((error) => {
-            console.error('Error al obtener los detalles del registro:', error);
-        });
-};
-
 // Agrega el evento de clic al botón de cerrar del modal de formulario
 document.getElementById('btn-cerrar-modal').addEventListener('click', () => {
+
     document.getElementById('modal-formulario').classList.add('oculto');
+
 });
 
 
