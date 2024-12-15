@@ -201,30 +201,52 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (modulo === 'productos') {
 
             camposFormulario.innerHTML = `
-                <label for="nombre">Nombre del producto:</label>
-                <input type="text" id="nombre" name="nombre" required>
-                <label for="cantidad">Cantidad:</label>
-                <input type="number" id="cantidad" name="cantidad" required>
-                <label for="precio_unitario">Precio Unitario:</label>
-                <input type="number" step="0.01" id="precio_unitario" name="precio_unitario" required>
+                <label for="nombre" class="form-label">Nombre del producto:</label>
+                <input type="text" id="nombre" name="nombre" class="form-control" required>
+                <label for="sku" class="form-label">SKU:</label>
+                <input type="text" id="sku" name="sku" class="form-control" required>
+                <label for="cantidad" class="form-label">Cantidad:</label>
+                <input type="number" id="cantidad" name="cantidad" class="form-control" required>
+                <label for="precio_unitario" class="form-label">Precio Unitario:</label>
+                <input type="number" step="0.01" id="precio_unitario" name="precio_unitario" class="form-control" required>
+                <label for="ubicacion" class="form-label">Ubicación:</label>
+                <select id="ubicacion" name="ubicacion" class="form-select" required>
+                    <option values="Recepcion">Recepción</option>
+                    <option values="Almacen">Almacén</option>
+                    <option values="Preparacion">Preparación</option>
+                    <option values="Embalaje">Embalaje</option>
+                    <option values="Expedicion">Expedición</option>
+                </select>
+                <label for="proveedor" class="form-label">Proveedor:</label>
+                <select id="proveedor" name="proveedor" class="form-select" required>
+                   
+                </select>
             `;
+            
+            cargarProveedores();
+
+        } else if (modulo === 'proveedores') {
+
+            camposFormulario.innerHTML = `
+                <label for="nombre">Nombre del proveedor:</label>
+            `;
+
+        } else if (modulo === 'movimientos') {
+
 
         }
 
-        // Agregar más módulos según sea necesario
-
     };
 
-    // Función para cargar campos del formulario de edición
     const cargarCamposFormularioEdicion = (modulo, data) => {
 
         camposFormulario.innerHTML = '';
-
+    
         if (modulo === 'empleados') {
 
             Object.keys(data).forEach((key) => {
 
-                if (key === 'id') {
+                if (key === 'id_empleado') {
 
                     camposFormulario.innerHTML += `
                         <label for="${key}" class="form-label">${key.charAt(0).toUpperCase() + key.slice(1)}:</label>
@@ -251,8 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
             });
-
-            // Agregar campo de contraseña con placeholder
+    
             camposFormulario.innerHTML += `
                 <label for="password" class="form-label">Contraseña:</label>
                 <input type="password" id="password" name="password" placeholder="Escribir nueva contraseña" class="form-control">
@@ -261,17 +282,49 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (modulo === 'productos') {
 
             camposFormulario.innerHTML = `
-                <label for="nombre">Nombre del producto:</label>
-                <input type="text" id="nombre" name="nombre" value="${data.nombre}" required>
-                <label for="cantidad">Cantidad:</label>
-                <input type="number" id="cantidad" name="cantidad" value="${data.cantidad}" required>
-                <label for="precio_unitario">Precio Unitario:</label>
-                <input type="number" step="0.01" id="precio_unitario" name="precio_unitario" value="${data.precio_unitario}" required>
+                <label for="id_producto" class="form-label">ID:</label>
+                <input type="text" id="id_producto" name="id_producto" value="${data.id_producto}" class="form-control" readonly>
+                <label for="nombre" class="form-label">Nombre del producto:</label>
+                <input type="text" id="nombre" name="nombre" value="${data.nombre}" class="form-control" required>
+                <label for="sku" class="form-label">SKU:</label>
+                <input type="text" id="sku" name="sku" value="${data.sku}" class="form-control" required>
+                <label for="cantidad" class="form-label">Cantidad:</label>
+                <input type="number" id="cantidad" name="cantidad" value="${data.cantidad}" class="form-control" required>
+                <label for="precio_unitario" class="form-label">Precio Unitario:</label>
+                <input type="number" step="0.01" id="precio_unitario" name="precio_unitario" class="form-control" value="${data.precio_unitario}" required>
+                <label for="ubicacion" class="form-label">Ubicación:</label>
+                <input type="text" id="ubicacion" name="ubicacion" value="${data.ubicacion}" class="form-control" required>
+                <label for="proveedor" class="form-label">Proveedor:</label>
+                <select id="proveedor" name="proveedor" class="form-select" required>
+                    <!-- Proveedores se llenarán dinámicamente -->
+                </select>
             `;
 
-        }
+            cargarProveedores(data.id_proveedor); // Llamar a la función para cargar los proveedores y seleccionar el actual
 
-        // Agregar más módulos según sea necesario
+        } else if (modulo === 'proveedores') {
+
+            Object.keys(data).forEach((key) => {
+
+                if (key === 'id_proveedor') {
+
+                    camposFormulario.innerHTML += `
+                        <label for="${key}" class="form-label">${key.charAt(0).toUpperCase() + key.slice(1)}:</label>
+                        <input type="text" id="${key}" name="${key}" value="${data[key]}" class="form-control" readonly>
+                    `;
+
+                } else if (key !== 'updated_at' && key !== 'created_at') {
+
+                    camposFormulario.innerHTML += `
+                        <label for="${key}" class="form-label">${key.charAt(0).toUpperCase() + key.slice(1)}:</label>
+                        <input type="text" id="${key}" name="${key}" value="${data[key]}" class="form-control" required>
+                    `;
+
+                }
+
+            });
+
+        }
 
     };
 
@@ -294,6 +347,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
             });
 
+    };
+
+
+     // Función para cargar los proveedores y llenar el select
+    const cargarProveedores = (selectedProveedorId) => {
+
+        fetch('/api/proveedores')
+
+            .then(response => response.json())
+            .then(data => {
+
+                const selectProveedor = document.getElementById('proveedor');
+
+                selectProveedor.innerHTML = ''; // Limpiar opciones existentes
+
+                data.forEach(proveedor => {
+
+                    const option = document.createElement('option');
+                    option.value = proveedor.id_proveedor;
+                    option.textContent = proveedor.nombre;
+
+                    if (proveedor.id_proveedor === selectedProveedorId) {
+
+                        option.selected = true;
+
+                    }
+
+                    selectProveedor.appendChild(option);
+
+                });
+
+            })
+            .catch(error => {
+
+                console.error('Error al cargar los proveedores:', error);
+                mostrarModalError('Ha ocurrido un error al cargar los proveedores. Por favor, inténtelo de nuevo.');
+            
+            });
     };
 
     window.abrirModalEdicion = abrirModalEdicion;
@@ -334,8 +425,9 @@ const cargarModulo = (modulo) => {
 const camposAMostrar = {
 
     empleados: ['id_empleado', 'nombre', 'email', 'rol'], 
-    productos: ['id_producto', 'nombre', 'cantidad'],
-    
+    productos: ['id_producto', 'sku', 'nombre', 'cantidad', 'precio_unitario'],
+    proveedores: ['id_proveedor', 'nombre', 'email', 'telefono'],
+    movimientos: ['id_movimiento', 'id_producto', 'fecha', 'tipo', 'cantidad']
 
 };
 
@@ -346,11 +438,9 @@ const actualizarTabla = (data, modulo) => {
     const thead = document.querySelector('#tabla-datos thead');
     const tbody = document.querySelector('#tabla-datos tbody');
 
-    
     thead.innerHTML = '';
     tbody.innerHTML = '';
 
-    // Verificar si hay datos
     if (data.length === 0) {
 
         tbody.innerHTML = '<tr><td colspan="5">No hay registros disponibles</td></tr>';
@@ -358,21 +448,37 @@ const actualizarTabla = (data, modulo) => {
 
     }
 
-    // Obtener los campos a mostrar para el módulo actual
-    const campos = camposAMostrar[modulo] || Object.keys(data[0]); // Si no está definido, muestra todos los campos
+    const campos = camposAMostrar[modulo] || Object.keys(data[0]);
 
-    // Generar cabecera de la tabla
     const headerRow = campos.map((campo) => `<th>${campo.charAt(0).toUpperCase() + campo.slice(1)}</th>`).join('');
     thead.innerHTML = `<tr>${headerRow}<th>Acciones</th></tr>`;
 
-    // Generar filas de la tabla
     data.forEach((item) => {
 
-        
         const idCampo = campos.find(campo => campo.includes('id')) || 'id';
-        const idValor = item[idCampo]; 
+        const idValor = item[idCampo];
 
-        const row = campos.map((campo) => `<td>${item[campo] || ''}</td>`).join(''); // Solo muestra los campos especificados
+        const row = campos.map((campo) => {
+
+            if (campo === 'id_proveedor' && item['nombre_proveedor']) {
+
+                return `<td>${item['nombre_proveedor']}</td>`;
+
+            } else if (campo === 'id_empleado' && item['nombre_empleado']) {
+
+                return `<td>${item['nombre_empleado']}</td>`;
+
+            } else if (campo === 'id_producto' && item['nombre_producto']) {
+
+                return `<td>${item['nombre_producto']}</td>`;
+
+            } else {
+
+                return `<td>${item[campo] || ''}</td>`;
+
+            }
+
+        }).join('');
 
         tbody.innerHTML += `
             <tr>
@@ -389,25 +495,24 @@ const actualizarTabla = (data, modulo) => {
                     </button>
                 </td>
             </tr>
-        `;   
+        `;
+
     });
 
 };
 
+
 const verDetalles = (id) => {
 
-    
     fetch(`/api/${moduloActivo}/${id}`)
 
         .then((response) => response.json())
         .then((data) => {
 
-           
             const btnCerrarDetalles = document.getElementById('btn-cerrar-detalles');
             const modalDetalles = document.getElementById('modal-detalles');
             const detallesContenido = modalDetalles.querySelector('.detalles-contenido');
 
-            
             detallesContenido.innerHTML = '';
 
             btnCerrarDetalles.addEventListener('click', () => {
@@ -416,18 +521,39 @@ const verDetalles = (id) => {
 
             });
 
-            
             Object.keys(data).forEach((key) => {
-                detallesContenido.innerHTML += `
-                    <p><strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${data[key]}</p>
-                `;
+
+                if (key === 'id_proveedor' && data['nombre_proveedor']) {
+
+                    detallesContenido.innerHTML += `
+                        <p><strong>Proveedor:</strong> ${data['nombre_proveedor']}</p>
+                    `;
+
+                } else if (key === 'id_empleado' && data['nombre_empleado']) {
+
+                    detallesContenido.innerHTML += `
+                        <p><strong>Empleado:</strong> ${data['nombre_empleado']}</p>
+                    `;
+
+                } else if (key === 'id_producto' && data['nombre_producto']) {
+
+                    detallesContenido.innerHTML += `
+                        <p><strong>Producto:</strong> ${data['nombre_producto']}</p>
+                    `;
+
+                } else {
+
+                    detallesContenido.innerHTML += `
+                        <p><strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${data[key]}</p>
+                    `;
+
+                }
+
             });
 
-            
             modalDetalles.classList.remove('oculto');
 
         })
-
         .catch((error) => {
 
             console.error(`Error al obtener los detalles del registro con ID ${id}:`, error);

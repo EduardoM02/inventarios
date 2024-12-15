@@ -4,16 +4,51 @@ const db = require('../models/db');
 
 
 
-// Obtener todos los movimientos
+// Obtener todos los movimientos con los nombres de producto, empleado y proveedor
 router.get('/', (req, res) => {
 
-    db.query('SELECT * FROM movimientos', (err, results) => {
+    const query = `
+        SELECT m.*, p.nombre AS nombre_producto, e.nombre AS nombre_empleado, pr.nombre AS nombre_proveedor
+        FROM movimientos m
+        JOIN productos p ON m.id_producto = p.id_producto
+        JOIN empleados e ON m.id_empleado = e.id_empleado
+        LEFT JOIN proveedores pr ON m.id_proveedor = pr.id_proveedor
+    `;
+
+    db.query(query, (err, results) => {
 
         if (err) return res.status(500).json({ error: err.message });
         res.json(results);
 
     });
 
+});
+
+
+// Obtener detalles de un movimiento por ID
+router.get('/:id', (req, res) => {
+
+    const { id } = req.params;
+
+    const query = `
+        SELECT m.*, p.nombre AS nombre_producto, e.nombre AS nombre_empleado, pr.nombre AS nombre_proveedor
+        FROM movimientos m
+        JOIN productos p ON m.id_producto = p.id_producto
+        JOIN empleados e ON m.id_empleado = e.id_empleado
+        LEFT JOIN proveedores pr ON m.id_proveedor = pr.id_proveedor
+        WHERE m.id_movimiento = ?
+    `;
+
+    db.query(query, [id], (err, results) => {
+
+        if (err) return res.status(500).json({ error: err.message });
+
+        if (results.length === 0) return res.status(404).json({ error: 'Movimiento no encontrado' });
+        
+        res.json(results[0]);
+
+    });
+    
 });
 
 
@@ -72,7 +107,6 @@ router.delete('/:id', (req, res) => {
     });
 
 });
-
 
 
 module.exports = router;

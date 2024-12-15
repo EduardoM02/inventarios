@@ -17,6 +17,24 @@ router.get('/', (req, res) => {
 });
 
 
+// Obtener detalles de un proveedor por ID
+router.get('/:id', (req, res) => {
+
+    const { id } = req.params;
+
+    db.query('SELECT * FROM proveedores WHERE id_proveedor = ?', [id], (err, results) => {
+
+        if (err) return res.status(500).json({ error: err.message });
+        
+        if (results.length === 0) return res.status(404).json({ error: 'Proveedor no encontrado' });
+
+        res.json(results[0]);
+
+    });
+
+});
+
+
 
 // Agregar un nuevo proveedor
 router.post('/', (req, res) => {
