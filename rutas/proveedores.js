@@ -84,11 +84,22 @@ router.delete('/:id', (req, res) => {
 
     db.query('DELETE FROM proveedores WHERE id_proveedor = ?', [id], (err) => {
 
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ mensaje: 'Proveedor eliminado correctamente' });
-        
-    });
+        if (err) {
 
+            if (err.code === 'ER_ROW_IS_REFERENCED_2') {
+
+                return res.status(400).json({ error: 'No se puede eliminar el proveedor porque tiene productos asociados.' });
+            
+            }
+
+            return res.status(500).json({ error: err.message });
+
+        }
+
+        res.json({ mensaje: 'Proveedor eliminado correctamente' });
+
+    });
+    
 });
 
 

@@ -61,7 +61,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         });
 
-        const id = jsonData.id_empleado || jsonData.id_producto;
+        let id;
+
+        switch (moduloActivo) {
+
+            case 'movimientos':
+                id = jsonData.id_movimiento;
+                break;
+
+            case 'empleados':
+                id = jsonData.id_empleado;
+                break;
+
+            case 'productos':
+                id = jsonData.id_producto;
+                break;
+
+            case 'proveedores':
+                id = jsonData.id_proveedor;
+                break;
+
+            default:
+
+                id = null;
+
+        }
         const url = `/api/${moduloActivo}`;
         const method = id ? 'PUT' : 'POST';
         const endpoint = id ? `${url}/${id}` : url;
@@ -158,22 +182,28 @@ document.addEventListener('DOMContentLoaded', () => {
             method: 'DELETE'
 
         })
-
         .then(response => response.json())
         .then(data => {
 
-            console.log('Registro eliminado:', data);
-            cargarModulo(moduloActivo);
+            if (data.error) {
+
+                mostrarModalError(data.error);
+
+            } else {
+
+                console.log('Registro eliminado:', data);
+                cargarModulo(moduloActivo);
+
+            }
 
         })
-
         .catch((error) => {
 
             console.error('Error al eliminar el registro:', error);
             mostrarModalError('Ha ocurrido un error al eliminar el registro. Por favor, inténtelo de nuevo.');
-
+        
         });
-
+        
     };
 
 
@@ -228,11 +258,65 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (modulo === 'proveedores') {
 
             camposFormulario.innerHTML = `
-                <label for="nombre">Nombre del proveedor:</label>
+                <label for="nombre" class="form-label">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" class="form-control" required>
+                <label for="contacto" class="form-label">Persona de contacto:</label>
+                <input type="text" id="contacto" name="contacto" class="form-control" required>
+                <label for="telefono" class="form-label">Teléfono:</label>
+                <input type="tel" id="telefono" name="telefono" class="form-control" required>
+                <label for="email" class="form-label">Email:</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+                <label for="direccion" class="form-label">Dirección:</label>
+                <input type="text" id="direccion" name="direccion" class="form-control" required>
             `;
 
         } else if (modulo === 'movimientos') {
 
+            camposFormulario.innerHTML = `
+            <label for="id_producto" class="form-label">Producto:</label>
+            <select id="id_producto" name="id_producto" class="form-select" required>
+                <!-- Productos se llenarán dinámicamente -->
+            </select>
+            <label for="tipo" class="form-label">Tipo:</label>
+            <select id="tipo" name="tipo" class="form-select" required>
+                <option value="entrada">Entrada</option>
+                <option value="salida">Salida</option>
+            </select>
+            <label for="cantidad" class="form-label">Cantidad:</label>
+            <input type="number" id="cantidad" name="cantidad" class="form-control" required>
+            <label for="id_empleado" class="form-label">Empleado Responsable:</label>
+            <select id="id_empleado" name="id_empleado" class="form-select" required>
+                <!-- Empleados se llenarán dinámicamente -->
+            </select>
+                <label for="proveedor" class="form-label">Proveedor:</label>
+                <select id="proveedor" name="id_proveedor" class="form-select">
+                    <!-- Proveedores se llenarán dinámicamente -->
+                </select>
+            <label for="motivo" class="form-label">Motivo:</label>
+            <textarea id="motivo" name="motivo" class="form-control" required></textarea>
+            `;
+
+            cargarProductos();
+            cargarEmpleados();
+            cargarProveedores();
+
+            document.getElementById('tipo').addEventListener('change', (e) => {
+
+                const proveedorContainer = document.getElementById('proveedor');
+
+                if (e.target.value === 'entrada') {
+
+                    proveedorContainer.style.display = 'block';
+
+                } else {
+
+                    proveedorContainer.style.display = 'none';
+
+                }
+
+            });
+
+            document.getElementById('tipo').dispatchEvent(new Event('change'));
 
         }
 
@@ -293,7 +377,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 <label for="precio_unitario" class="form-label">Precio Unitario:</label>
                 <input type="number" step="0.01" id="precio_unitario" name="precio_unitario" class="form-control" value="${data.precio_unitario}" required>
                 <label for="ubicacion" class="form-label">Ubicación:</label>
-                <input type="text" id="ubicacion" name="ubicacion" value="${data.ubicacion}" class="form-control" required>
+                <select id="ubicacion" name="ubicacion" class="form-select" required>
+                    <option value="Recepcion" ${data.ubicacion === 'Recepcion' ? 'selected' : ''}>Recepción</option>
+                    <option value="Almacen" ${data.ubicacion === 'Almacen' ? 'selected' : ''}>Almacén</option>
+                    <option value="Preparacion" ${data.ubicacion === 'Preparacion' ? 'selected' : ''}>Preparación</option>
+                    <option value="Embalaje" ${data.ubicacion === 'Embalaje' ? 'selected' : ''}>Embalaje</option>
+                    <option value="Expedicion" ${data.ubicacion === 'Expedicion' ? 'selected' : ''}>Expedición</option>
+                </select>
                 <label for="proveedor" class="form-label">Proveedor:</label>
                 <select id="proveedor" name="proveedor" class="form-select" required>
                     <!-- Proveedores se llenarán dinámicamente -->
@@ -323,6 +413,58 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
             });
+
+        } else if (modulo === 'movimientos') {
+
+            camposFormulario.innerHTML = `
+            <label for="id_movimiento" class="form-label">ID:</label>
+            <input type="text" id="id_movimiento" name="id_movimiento" value="${data.id_movimiento}" class="form-control" readonly>
+            <label for="id_producto" class="form-label">Producto:</label>
+            <select id="id_producto" name="id_producto" class="form-select" required>
+                <!-- Productos se llenarán dinámicamente -->
+            </select>
+            <label for="tipo" class="form-label">Tipo:</label>
+            <select id="tipo" name="tipo" class="form-select" required>
+                <option value="entrada" ${data.tipo === 'entrada' ? 'selected' : ''}>Entrada</option>
+                <option value="salida" ${data.tipo === 'salida' ? 'selected' : ''}>Salida</option>
+            </select>
+            <label for="cantidad" class="form-label">Cantidad:</label>
+            <input type="number" id="cantidad" name="cantidad" value="${data.cantidad}" class="form-control" required>
+            <label for="id_empleado" class="form-label">Empleado Responsable:</label>
+            <select id="id_empleado" name="id_empleado" class="form-select" required>
+                <!-- Empleados se llenarán dinámicamente -->
+            </select>
+            <div id="proveedor-container">
+                <label for="proveedor" class="form-label">Proveedor:</label>
+                <select id="proveedor" name="id_proveedor" class="form-select">
+                    <!-- Proveedores se llenarán dinámicamente -->
+                </select>
+            </div>
+            <label for="motivo" class="form-label">Motivo:</label>
+            <textarea id="motivo" name="motivo" class="form-control" required>${data.motivo}</textarea>
+            `;
+
+            cargarProductos(data.id_producto);
+            cargarEmpleados(data.id_empleado);
+            cargarProveedores(data.id_proveedor);
+
+            document.getElementById('tipo').addEventListener('change', (e) => {
+
+                const proveedorContainer = document.getElementById('proveedor-container');
+
+                if (e.target.value === 'entrada') {
+
+                    proveedorContainer.style.display = 'block';
+
+                } else {
+
+                    proveedorContainer.style.display = 'none';
+
+                }
+
+            });
+
+            document.getElementById('tipo').dispatchEvent(new Event('change'));
 
         }
 
@@ -385,6 +527,66 @@ document.addEventListener('DOMContentLoaded', () => {
                 mostrarModalError('Ha ocurrido un error al cargar los proveedores. Por favor, inténtelo de nuevo.');
             
             });
+    };
+
+
+    const cargarProductos = () => {
+
+        fetch('/api/productos')
+
+            .then(response => response.json())
+            .then(data => {
+
+                const selectProducto = document.getElementById('id_producto');
+                selectProducto.innerHTML = ''; // Limpiar opciones existentes
+                
+                data.forEach(producto => {
+
+                    const option = document.createElement('option');
+                    option.value = producto.id_producto;
+                    option.textContent = producto.nombre;
+                    selectProducto.appendChild(option);
+
+                });
+
+            })
+            .catch(error => {
+
+                console.error('Error al cargar los productos:', error);
+                mostrarModalError('Ha ocurrido un error al cargar los productos. Por favor, inténtelo de nuevo.');
+            
+            });
+
+    };
+
+
+    const cargarEmpleados = () => {
+
+        fetch('/api/empleados')
+
+            .then(response => response.json())
+            .then(data => {
+
+                const selectEmpleado = document.getElementById('id_empleado');
+                selectEmpleado.innerHTML = ''; // Limpiar opciones existentes
+
+                data.forEach(empleado => {
+
+                    const option = document.createElement('option');
+                    option.value = empleado.id_empleado;
+                    option.textContent = empleado.nombre;
+                    selectEmpleado.appendChild(option);
+
+                });
+
+            })
+            .catch(error => {
+
+                console.error('Error al cargar los empleados:', error);
+                mostrarModalError('Ha ocurrido un error al cargar los empleados. Por favor, inténtelo de nuevo.');
+            
+            });
+
     };
 
     window.abrirModalEdicion = abrirModalEdicion;

@@ -70,7 +70,7 @@
 
             <li>
 
-                <a href="#" class="logout">
+                <a href="#" id="logout-button" class="logout">
 
                     <i class="fa fa-power-off nav-icon"></i>
                     <span class="nav-text">Cerrar sesión</span>
@@ -90,6 +90,7 @@
         <header class="module-title">
 
             <h1 id="modulo-titulo">Nombre del módulo</h1>
+            <span id="user-email" class="form-label">Sesión de: </span>
 
         </header>
 
@@ -245,6 +246,68 @@
 
     <!-- Scripts -->
     <script src="main.js"></script>
+
+    <script>
+
+        // Verificar si el usuario está autenticado
+        fetch('/api/auth/verify', {
+            method: 'GET',
+            credentials: 'include'
+        })
+        .then(response => {
+
+            if (!response.ok) {
+
+                window.location.href = '/login.html';
+
+            } else {
+
+                return response.json();
+
+            }
+        
+        })
+        .then(data => {
+
+            if (data && data.email) {
+
+                document.getElementById('user-email').textContent = `Sesión de: ${data.email}`;
+
+            }
+
+        })
+        .catch(error => {
+
+            console.error('Error:', error);
+            window.location.href = '/login.html';
+
+        });
+
+
+        // Función para cerrar sesión
+        document.getElementById('logout-button').addEventListener('click', function(e) {
+           
+            e.preventDefault();
+
+            fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                window.location.href = '/login.html';
+
+            })
+            .catch(error => {
+
+                console.error('Error:', error);
+
+            });
+
+        });
+
+    </script>
     
 </body>
 </html>

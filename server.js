@@ -1,5 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 const path = require('path');
 
 
@@ -8,6 +10,7 @@ const productosRouter = require('./rutas/productos');
 const empleadosRouter = require('./rutas/empleados');
 const proveedoresRouter = require('./rutas/proveedores');
 const movimientosRouter = require('./rutas/movimientos');
+const authRouter = require('./rutas/auth');
 
 
 const app = express();
@@ -15,7 +18,28 @@ const app = express();
 
 // Middleware
 app.use(bodyParser.json());
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+
+// Middleware de autenticación
+const authMiddleware = (req, res, next) => {
+
+    const token = req.cookies.token;
+
+    if (!token) return res.status(401).json({ error: 'Acceso no autorizado' });
+
+    jwt.verify(token, 'A1B2C3D4E5F6G7H8I9J10', (err, decoded) => {
+
+        if (err) return res.status(401).json({ error: 'Acceso no autorizado' });
+
+        req.user = decoded;
+        next();
+
+    });
+
+};
+
 
 
 // Rutas
@@ -23,6 +47,7 @@ app.use('/api/productos', productosRouter); // CRUD de productos
 app.use('/api/empleados', empleadosRouter); // CRUD de empleados
 app.use('/api/proveedores', proveedoresRouter); // CRUD de proveedores
 app.use('/api/movimientos', movimientosRouter); // Gestión de movimientos
+app.use('/api/auth', authRouter); // Rutas de autenticación
 
 // Ruta principal
 app.get('/', (req, res) => {

@@ -58,6 +58,8 @@ router.post('/', (req, res) => {
 
     const { id_producto, tipo, cantidad, id_empleado, id_proveedor, motivo } = req.body;
 
+    console.log('Datos recibidos:', req.body);
+
     db.query('INSERT INTO movimientos (id_producto, tipo, cantidad, id_empleado, id_proveedor, motivo) VALUES (?, ?, ?, ?, ?, ?)', 
         [id_producto, tipo, cantidad, id_empleado, id_proveedor, motivo], 
         (err, results) => {
