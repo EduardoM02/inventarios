@@ -70,7 +70,7 @@
 
             <li>
 
-                <a href="#" class="logout">
+                <a href="#" id="logout-button" class="logout">
 
                     <i class="fa fa-power-off nav-icon"></i>
                     <span class="nav-text">Cerrar sesión</span>
@@ -90,6 +90,7 @@
         <header class="module-title">
 
             <h1 id="modulo-titulo">Nombre del módulo</h1>
+            <span id="user-email" class="form-label">Sesión de: </span>
 
         </header>
 
@@ -99,7 +100,7 @@
 
                 <section id="boton-registrar" style="text-align: center; padding-bottom: 10px;">
 
-                    <button id="btn-registrar">Registrar nuevo</button>
+                    <button id="btn-registrar" class="btn-light">Registrar nuevo</button>
 
                 </section>
 
@@ -135,20 +136,24 @@
 
         <div class="modal-contenido">
 
-            <h2 id="modal-titulo">Registrar nuevo</h2>
+            <h2 id="modal-titulo">Registrar</h2>
 
             <form id="formulario-dinamico">
 
-                <!-- Campos dinámicos según el módulo -->
+                
 
                 <div id="campos-formulario">
 
-                    <!-- Ejemplo de campo genérico -->
+                    
 
                 </div>
 
-                <button type="submit" id="btn-enviar">Guardar</button>
-                <button type="button" id="btn-cerrar-modal">Cerrar</button>
+                <div class="botones">
+
+                    <button type="submit" id="btn-enviar" class="btn-success">Guardar</button>
+                    <button type="button" id="btn-cerrar-modal" class="btn-danger">Cerrar</button>
+
+                </div>
 
             </form>
 
@@ -156,7 +161,7 @@
 
     </div>
     
-
+    <!-- Modal para detalles -->
     <div id="modal-detalles" class="modal oculto">
 
         <div class="modal-contenido">
@@ -167,7 +172,70 @@
 
             <div class="detalles-contenido">
 
-                <!-- Los detalles del registro se cargarán aquí -->
+                
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Modal de éxito -->
+    <div id="modal-exito" class="modal oculto">
+
+        <div class="modal-contenido-exito">
+
+            <span id="btn-cerrar-exito" class="cerrar-modal">&times;</span>
+
+            <div class="modal-icono">
+
+                <i class="fa fa-check-circle fa-2x"></i>
+
+            </div>
+
+            <h2>Éxito</h2>
+
+            <p id="mensaje-exito">Operación realizada con éxito.</p>
+
+        </div>
+
+    </div>
+
+    <!-- Modal de error -->
+    <div id="modal-error" class="modal oculto">
+
+        <div class="modal-contenido-error">
+
+            <span id="btn-cerrar-error" class="cerrar-modal">&times;</span>
+
+            <div class="modal-icono">
+
+                <i class="fa fa-times-circle fa-2x"></i>
+
+            </div>
+
+            <h2>Error</h2>
+
+            <p id="mensaje-error">Ha ocurrido un error. Por favor, inténtelo de nuevo.</p>
+
+        </div>
+
+    </div>
+
+
+    <!-- Modal de confirmación -->
+    <div id="modal-confirmacion" class="modal oculto">
+
+        <div class="modal-contenido-confirmacion">
+
+            <h2>Confirmación</h2>
+
+            <p>¿Está seguro de que desea eliminar este registro?</p>
+
+            <div class="botones">
+
+                <button id="btn-confirmar" class="btn-danger">Eliminar</button>
+                <button id="btn-cancelar" class="btn-light">Cancelar</button>
 
             </div>
 
@@ -178,6 +246,68 @@
 
     <!-- Scripts -->
     <script src="main.js"></script>
+
+    <script>
+
+        // Verificar si el usuario está autenticado
+        fetch('/api/auth/verify', {
+            method: 'GET',
+            credentials: 'include'
+        })
+        .then(response => {
+
+            if (!response.ok) {
+
+                window.location.href = '/login.html';
+
+            } else {
+
+                return response.json();
+
+            }
+        
+        })
+        .then(data => {
+
+            if (data && data.email) {
+
+                document.getElementById('user-email').textContent = `Sesión de: ${data.email}`;
+
+            }
+
+        })
+        .catch(error => {
+
+            console.error('Error:', error);
+            window.location.href = '/login.html';
+
+        });
+
+
+        // Función para cerrar sesión
+        document.getElementById('logout-button').addEventListener('click', function(e) {
+           
+            e.preventDefault();
+
+            fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                window.location.href = '/login.html';
+
+            })
+            .catch(error => {
+
+                console.error('Error:', error);
+
+            });
+
+        });
+
+    </script>
     
 </body>
 </html>

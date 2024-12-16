@@ -18,6 +18,32 @@ router.get('/', (req, res) => {
 
 
 
+// Obtener detalles de un producto por ID
+router.get('/:id', (req, res) => {
+
+    const { id } = req.params;
+
+    const query = `
+        SELECT p.*, pr.nombre AS nombre_proveedor
+        FROM productos p
+        JOIN proveedores pr ON p.id_proveedor = pr.id_proveedor
+        WHERE p.id_producto = ?
+    `;
+
+    db.query(query, [id], (err, results) => {
+
+        if (err) return res.status(500).json({ error: err.message });
+
+        if (results.length === 0) return res.status(404).json({ error: 'Producto no encontrado' });
+
+        res.json(results[0]);
+
+    });
+    
+});
+
+
+
 // Agregar un nuevo producto
 router.post('/', (req, res) => {
 
@@ -68,6 +94,25 @@ router.delete('/:id', (req, res) => {
 
         if (err) return res.status(500).json({ error: err.message });
         res.json({ mensaje: 'Producto eliminado correctamente' });
+
+    });
+
+});
+
+
+// Obtener todos los productos con el nombre del proveedor
+router.get('/', (req, res) => {
+
+    const query = `
+        SELECT p.*, pr.nombre AS nombre_proveedor
+        FROM productos p
+        JOIN proveedores pr ON p.id_proveedor = pr.id_proveedor
+    `;
+
+    db.query(query, (err, results) => {
+
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
 
     });
 
