@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
     db.query('SELECT * FROM proveedores', (err, results) => {
 
         if (err) return res.status(500).json({ error: err.message });
-        res.json(results); // Enviar los datos como JSON
+        res.json(results);
         
     });
 

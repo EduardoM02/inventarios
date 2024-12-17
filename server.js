@@ -43,10 +43,10 @@ const authMiddleware = (req, res, next) => {
 
 
 // Rutas
-app.use('/api/productos', productosRouter); // CRUD de productos
-app.use('/api/empleados', empleadosRouter); // CRUD de empleados
-app.use('/api/proveedores', proveedoresRouter); // CRUD de proveedores
-app.use('/api/movimientos', movimientosRouter); // Gestión de movimientos
+app.use('/api/productos', authMiddleware, productosRouter); // CRUD de productos
+app.use('/api/empleados', authMiddleware, empleadosRouter); // CRUD de empleados
+app.use('/api/proveedores', authMiddleware, proveedoresRouter); // CRUD de proveedores
+app.use('/api/movimientos', authMiddleware, movimientosRouter); // Gestión de movimientos
 app.use('/api/auth', authRouter); // Rutas de autenticación
 
 // Ruta principal

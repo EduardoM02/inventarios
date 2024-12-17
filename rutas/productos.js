@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../models/db'); // Conexión a la base de datos
+const db = require('../models/db'); +
 
 
 
@@ -10,7 +10,7 @@ router.get('/', (req, res) => {
     db.query('SELECT * FROM productos', (err, results) => {
 
         if (err) return res.status(500).json({ error: err.message });
-        res.json(results); // Enviar los datos como JSON
+        res.json(results); 
 
     });
 

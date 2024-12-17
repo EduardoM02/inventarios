@@ -1,11 +1,13 @@
+
+
 const mysql = require('mysql2');
 
 const connection = mysql.createConnection({
 
-    host: 'localhost',         // XAMPP usa localhost por defecto
-    user: 'root',              // Usuario por defecto de MySQL en XAMPP
-    password: '',              // Por defecto, no hay contraseña (campo vacío)
-    database: 'inventariodb'  // Nombre de tu base de datos
+    host: 'localhost',         
+    user: 'root',              
+    password: '',              
+    database: 'inventariodb' 
 
 });
 

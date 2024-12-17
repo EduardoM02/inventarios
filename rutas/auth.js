@@ -36,6 +36,7 @@ router.post('/login', (req, res) => {
 
 });
 
+
 // Ruta de logout
 router.post('/logout', (req, res) => {
 

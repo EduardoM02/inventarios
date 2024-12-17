@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     });
 
+
     // Evento para enviar el formulario
     btnEnviar.addEventListener('click', (e) => {
 
@@ -66,18 +67,22 @@ document.addEventListener('DOMContentLoaded', () => {
         switch (moduloActivo) {
 
             case 'movimientos':
+
                 id = jsonData.id_movimiento;
                 break;
 
             case 'empleados':
+
                 id = jsonData.id_empleado;
                 break;
 
             case 'productos':
+
                 id = jsonData.id_producto;
                 break;
 
             case 'proveedores':
+
                 id = jsonData.id_proveedor;
                 break;
 
@@ -86,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 id = null;
 
         }
+
         const url = `/api/${moduloActivo}`;
         const method = id ? 'PUT' : 'POST';
         const endpoint = id ? `${url}/${id}` : url;
@@ -124,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     });
 
+
     // Función para mostrar el modal de éxito
     const mostrarModalExito = (mensaje) => {
         
@@ -132,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     };
 
+
     // Función para mostrar el modal de error
     const mostrarModalError = (mensaje) => {
 
@@ -139,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalError.classList.remove('oculto');
 
     };
+
 
     // Función para mostrar el modal de confirmación
     const mostrarModalConfirmacion = (id) => {
@@ -154,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     };
 
+
     // Evento para cerrar los modales de éxito y error
     btnCerrarExito.addEventListener('click', () => {
 
@@ -161,11 +171,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     });
 
+
     btnCerrarError.addEventListener('click', () => {
 
         modalError.classList.add('oculto');
 
     });
+
 
     btnCancelar.addEventListener('click', () => {
 
@@ -390,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </select>
             `;
 
-            cargarProveedores(data.id_proveedor); // Llamar a la función para cargar los proveedores y seleccionar el actual
+            cargarProveedores(data.id_proveedor); // cargar los proveedores y seleccionar el actual
 
         } else if (modulo === 'proveedores') {
 
@@ -605,12 +617,10 @@ const cargarModulo = (modulo) => {
     // Cambiar el título de la tabla según el módulo
     tablaTitulo.textContent = modulo.charAt(0).toUpperCase() + modulo.slice(1);
 
-    // Hacer la solicitud al backend para obtener los datos del módulo
     fetch(`/api/${modulo}`)
         .then((response) => response.json())
         .then((data) => {
 
-            // Llenar la tabla con los datos recibidos
             actualizarTabla(data, modulo);
 
         })
