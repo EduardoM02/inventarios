@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     });
 
+
     // Evento para enviar el formulario
     btnEnviar.addEventListener('click', (e) => {
 
@@ -66,18 +67,22 @@ document.addEventListener('DOMContentLoaded', () => {
         switch (moduloActivo) {
 
             case 'movimientos':
+
                 id = jsonData.id_movimiento;
                 break;
 
             case 'empleados':
+
                 id = jsonData.id_empleado;
                 break;
 
             case 'productos':
+
                 id = jsonData.id_producto;
                 break;
 
             case 'proveedores':
+
                 id = jsonData.id_proveedor;
                 break;
 
@@ -86,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 id = null;
 
         }
+
         const url = `/api/${moduloActivo}`;
         const method = id ? 'PUT' : 'POST';
         const endpoint = id ? `${url}/${id}` : url;
@@ -124,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     });
 
+
     // Función para mostrar el modal de éxito
     const mostrarModalExito = (mensaje) => {
         
@@ -132,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     };
 
+
     // Función para mostrar el modal de error
     const mostrarModalError = (mensaje) => {
 
@@ -139,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalError.classList.remove('oculto');
 
     };
+
 
     // Función para mostrar el modal de confirmación
     const mostrarModalConfirmacion = (id) => {
@@ -154,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     };
 
+
     // Evento para cerrar los modales de éxito y error
     btnCerrarExito.addEventListener('click', () => {
 
@@ -161,11 +171,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     });
 
+
     btnCerrarError.addEventListener('click', () => {
 
         modalError.classList.add('oculto');
 
     });
+
 
     btnCancelar.addEventListener('click', () => {
 
@@ -390,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </select>
             `;
 
-            cargarProveedores(data.id_proveedor); // Llamar a la función para cargar los proveedores y seleccionar el actual
+            cargarProveedores(data.id_proveedor); // cargar los proveedores y seleccionar el actual
 
         } else if (modulo === 'proveedores') {
 
@@ -589,174 +601,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     };
 
-    // Función para cargar los datos del módulo seleccionado y llenar la tabla
-    const cargarModulo = (modulo) => {
-
-        const tablaTitulo = document.getElementById('modulo-titulo');
-        const tablaDatos = document.getElementById('tabla-datos');
-
-        // Cambiar el título de la tabla según el módulo
-        tablaTitulo.textContent = modulo.charAt(0).toUpperCase() + modulo.slice(1);
-
-        // Hacer la solicitud al backend para obtener los datos del módulo
-        fetch(`/api/${modulo}`)
-            .then((response) => response.json())
-            .then((data) => {
-
-                // Llenar la tabla con los datos recibidos
-                actualizarTabla(data, modulo);
-
-            })
-            .catch((error) => {
-
-                console.error(`Error al cargar los datos del módulo ${modulo}:`, error);
-
-            });
-
-    };
-
-
-    // Campos a mostrar por módulo
-    const camposAMostrar = {
-
-        empleados: ['id_empleado', 'nombre', 'email', 'rol'], 
-        productos: ['id_producto', 'sku', 'nombre', 'cantidad', 'precio_unitario'],
-        proveedores: ['id_proveedor', 'nombre', 'email', 'telefono'],
-        movimientos: ['id_movimiento', 'id_producto', 'fecha', 'tipo', 'cantidad']
-
-    };
-
-
-
-    const actualizarTabla = (data, modulo) => {
-
-        const thead = document.querySelector('#tabla-datos thead');
-        const tbody = document.querySelector('#tabla-datos tbody');
-
-        thead.innerHTML = '';
-        tbody.innerHTML = '';
-
-        if (data.length === 0) {
-
-            tbody.innerHTML = '<tr><td colspan="5">No hay registros disponibles</td></tr>';
-            return;
-
-        }
-
-        const campos = camposAMostrar[modulo] || Object.keys(data[0]);
-
-        const headerRow = campos.map((campo) => `<th>${campo.charAt(0).toUpperCase() + campo.slice(1)}</th>`).join('');
-        thead.innerHTML = `<tr>${headerRow}<th>Acciones</th></tr>`;
-
-        data.forEach((item) => {
-
-            const idCampo = campos.find(campo => campo.includes('id')) || 'id';
-            const idValor = item[idCampo];
-
-            const row = campos.map((campo) => {
-
-                if (campo === 'id_proveedor' && item['nombre_proveedor']) {
-
-                    return `<td>${item['nombre_proveedor']}</td>`;
-
-                } else if (campo === 'id_empleado' && item['nombre_empleado']) {
-
-                    return `<td>${item['nombre_empleado']}</td>`;
-
-                } else if (campo === 'id_producto' && item['nombre_producto']) {
-
-                    return `<td>${item['nombre_producto']}</td>`;
-
-                } else {
-
-                    return `<td>${item[campo] || ''}</td>`;
-
-                }
-
-            }).join('');
-
-            tbody.innerHTML += `
-                <tr>
-                    ${row}
-                    <td>
-                        <button class="btn-primary" onclick="verDetalles(${idValor})">
-                            <i class="fas fa-info-circle"></i>
-                        </button>
-                        <button class="btn-warning" onclick="abrirModalEdicion(${idValor})">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-danger" onclick="mostrarModalConfirmacion(${idValor})">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
-
-        });
-
-    };
-
-
-    const verDetalles = (id) => {
-
-        fetch(`/api/${moduloActivo}/${id}`)
-
-            .then((response) => response.json())
-            .then((data) => {
-
-                const btnCerrarDetalles = document.getElementById('btn-cerrar-detalles');
-                const modalDetalles = document.getElementById('modal-detalles');
-                const detallesContenido = modalDetalles.querySelector('.detalles-contenido');
-
-                detallesContenido.innerHTML = '';
-
-                btnCerrarDetalles.addEventListener('click', () => {
-
-                    modalDetalles.classList.add('oculto');
-
-                });
-
-                Object.keys(data).forEach((key) => {
-
-                    if (key === 'id_proveedor' && data['nombre_proveedor']) {
-
-                        detallesContenido.innerHTML += `
-                            <p><strong>Proveedor:</strong> ${data['nombre_proveedor']}</p>
-                        `;
-
-                    } else if (key === 'id_empleado' && data['nombre_empleado']) {
-
-                        detallesContenido.innerHTML += `
-                            <p><strong>Empleado:</strong> ${data['nombre_empleado']}</p>
-                        `;
-
-                    } else if (key === 'id_producto' && data['nombre_producto']) {
-
-                        detallesContenido.innerHTML += `
-                            <p><strong>Producto:</strong> ${data['nombre_producto']}</p>
-                        `;
-
-                    } else {
-
-                        detallesContenido.innerHTML += `
-                            <p><strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${data[key]}</p>
-                        `;
-
-                    }
-
-                });
-
-                modalDetalles.classList.remove('oculto');
-
-            })
-            .catch((error) => {
-
-                console.error(`Error al obtener los detalles del registro con ID ${id}:`, error);
-
-            });
-
-    };
-    
     window.abrirModalEdicion = abrirModalEdicion;
     window.mostrarModalConfirmacion = mostrarModalConfirmacion;
 
@@ -764,7 +608,171 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+// Función para cargar los datos del módulo seleccionado y llenar la tabla
+const cargarModulo = (modulo) => {
 
+    const tablaTitulo = document.getElementById('modulo-titulo');
+    const tablaDatos = document.getElementById('tabla-datos');
+
+    // Cambiar el título de la tabla según el módulo
+    tablaTitulo.textContent = modulo.charAt(0).toUpperCase() + modulo.slice(1);
+
+    fetch(`/api/${modulo}`)
+        .then((response) => response.json())
+        .then((data) => {
+
+            actualizarTabla(data, modulo);
+
+        })
+        .catch((error) => {
+
+            console.error(`Error al cargar los datos del módulo ${modulo}:`, error);
+
+        });
+
+};
+
+
+// Campos a mostrar por módulo
+const camposAMostrar = {
+
+    empleados: ['id_empleado', 'nombre', 'email', 'rol'], 
+    productos: ['id_producto', 'sku', 'nombre', 'cantidad', 'precio_unitario'],
+    proveedores: ['id_proveedor', 'nombre', 'email', 'telefono'],
+    movimientos: ['id_movimiento', 'id_producto', 'fecha', 'tipo', 'cantidad']
+
+};
+
+
+
+const actualizarTabla = (data, modulo) => {
+
+    const thead = document.querySelector('#tabla-datos thead');
+    const tbody = document.querySelector('#tabla-datos tbody');
+
+    thead.innerHTML = '';
+    tbody.innerHTML = '';
+
+    if (data.length === 0) {
+
+        tbody.innerHTML = '<tr><td colspan="5">No hay registros disponibles</td></tr>';
+        return;
+
+    }
+
+    const campos = camposAMostrar[modulo] || Object.keys(data[0]);
+
+    const headerRow = campos.map((campo) => `<th>${campo.charAt(0).toUpperCase() + campo.slice(1)}</th>`).join('');
+    thead.innerHTML = `<tr>${headerRow}<th>Acciones</th></tr>`;
+
+    data.forEach((item) => {
+
+        const idCampo = campos.find(campo => campo.includes('id')) || 'id';
+        const idValor = item[idCampo];
+
+        const row = campos.map((campo) => {
+
+            if (campo === 'id_proveedor' && item['nombre_proveedor']) {
+
+                return `<td>${item['nombre_proveedor']}</td>`;
+
+            } else if (campo === 'id_empleado' && item['nombre_empleado']) {
+
+                return `<td>${item['nombre_empleado']}</td>`;
+
+            } else if (campo === 'id_producto' && item['nombre_producto']) {
+
+                return `<td>${item['nombre_producto']}</td>`;
+
+            } else {
+
+                return `<td>${item[campo] || ''}</td>`;
+
+            }
+
+        }).join('');
+
+        tbody.innerHTML += `
+            <tr>
+                ${row}
+                <td>
+                    <button class="btn-primary" onclick="verDetalles(${idValor})">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                    <button class="btn-warning" onclick="abrirModalEdicion(${idValor})">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-danger" onclick="mostrarModalConfirmacion(${idValor})">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+
+    });
+
+};
+
+
+const verDetalles = (id) => {
+
+    fetch(`/api/${moduloActivo}/${id}`)
+
+        .then((response) => response.json())
+        .then((data) => {
+
+            const btnCerrarDetalles = document.getElementById('btn-cerrar-detalles');
+            const modalDetalles = document.getElementById('modal-detalles');
+            const detallesContenido = modalDetalles.querySelector('.detalles-contenido');
+
+            detallesContenido.innerHTML = '';
+
+            btnCerrarDetalles.addEventListener('click', () => {
+
+                modalDetalles.classList.add('oculto');
+
+            });
+
+            Object.keys(data).forEach((key) => {
+
+                if (key === 'id_proveedor' && data['nombre_proveedor']) {
+
+                    detallesContenido.innerHTML += `
+                        <p><strong>Proveedor:</strong> ${data['nombre_proveedor']}</p>
+                    `;
+
+                } else if (key === 'id_empleado' && data['nombre_empleado']) {
+
+                    detallesContenido.innerHTML += `
+                        <p><strong>Empleado:</strong> ${data['nombre_empleado']}</p>
+                    `;
+
+                } else if (key === 'id_producto' && data['nombre_producto']) {
+
+                    detallesContenido.innerHTML += `
+                        <p><strong>Producto:</strong> ${data['nombre_producto']}</p>
+                    `;
+
+                } else {
+
+                    detallesContenido.innerHTML += `
+                        <p><strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${data[key]}</p>
+                    `;
+
+                }
+
+            });
+
+            modalDetalles.classList.remove('oculto');
+
+        })
+        .catch((error) => {
+
+            console.error(`Error al obtener los detalles del registro con ID ${id}:`, error);
+
+        });
+
+};
 
 
 // Agrega el evento de clic al botón de cerrar del modal de formulario
